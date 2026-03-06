@@ -9,6 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.desafiogfxisrael.R;
 import com.example.desafiogfxisrael.domain.Product;
 
@@ -46,6 +50,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     static class ProductViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageView;
+        private final TextView textImageError;
         private final TextView titleTextView;
         private final TextView categoryTextView;
         private final TextView priceTextView;
@@ -53,6 +58,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageProduct);
+            textImageError = itemView.findViewById(R.id.textImageError);
             titleTextView = itemView.findViewById(R.id.textProductTitle);
             categoryTextView = itemView.findViewById(R.id.textProductCategory);
             priceTextView = itemView.findViewById(R.id.textProductPrice);
@@ -64,7 +70,41 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                     ? itemView.getContext().getString(R.string.filter_all)
                     : product.getCategory().getDisplayName());
             priceTextView.setText(String.format(Locale.US, "$ %.2f", product.getPrice()));
-            imageView.setImageResource(R.mipmap.ic_launcher_round);
+
+            imageView.setVisibility(View.VISIBLE);
+            textImageError.setVisibility(View.GONE);
+
+            String imageUrl = product.getImage();
+            if (imageUrl == null || imageUrl.isEmpty()) {
+                imageView.setVisibility(View.GONE);
+                textImageError.setVisibility(View.VISIBLE);
+                textImageError.setText(itemView.getContext().getString(R.string.error_loading_image));
+                return;
+            }
+
+            Glide.with(itemView.getContext())
+                    .load(imageUrl)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .listener(new RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e,
+                                                    Object model, Target<android.graphics.drawable.Drawable> target,
+                                                    boolean isFirstResource) {
+                            imageView.setVisibility(View.GONE);
+                            textImageError.setVisibility(View.VISIBLE);
+                            textImageError.setText(itemView.getContext().getString(R.string.error_loading_image));
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(android.graphics.drawable.Drawable resource,
+                                                       Object model, Target<android.graphics.drawable.Drawable> target,
+                                                       com.bumptech.glide.load.DataSource dataSource,
+                                                       boolean isFirstResource) {
+                            return false;
+                        }
+                    })
+                    .into(imageView);
         }
     }
 }
