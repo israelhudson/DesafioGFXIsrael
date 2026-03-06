@@ -4,9 +4,7 @@ plugins {
 
 android {
     namespace 'com.example.desafiogfxisrael'
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.example.desafiogfxisrael"
@@ -35,6 +33,11 @@ dependencies {
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+    implementation libs.recyclerview
+    implementation libs.lifecycle.viewmodel
+    implementation libs.lifecycle.livedata
+    implementation libs.retrofit
+    implementation libs.retrofit.converter.gson
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

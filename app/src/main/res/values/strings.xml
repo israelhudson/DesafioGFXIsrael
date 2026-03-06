@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">DesafioGFXIsrael</string>
+    <string name="screen_title_products">Produtos</string>
+    <string name="filter_label">Filtrar por categoria</string>
+    <string name="filter_all">All</string>
+    <string name="category_mens">Men\'s clothing</string>
+    <string name="category_womens">Women\'s clothing</string>
+    <string name="category_jewelery">Jewelery</string>
+    <string name="category_electronics">Electronics</string>
+    <string name="loading_products">Carregando produtos...</string>
+    <string name="error_loading_products">Erro ao carregar produtos</string>
+    <string name="product_image_content_description">Imagem do produto</string>
+
+    <string-array name="category_filter_items">
+        <item>@string/filter_all</item>
+        <item>@string/category_mens</item>
+        <item>@string/category_womens</item>
+        <item>@string/category_jewelery</item>
+        <item>@string/category_electronics</item>
+    </string-array>
 </resources>
