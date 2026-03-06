@@ -69,4 +69,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/spinnerCategory" />
 
+    <TextView
+        android:id="@+id/textEmptyState"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/empty_filtered_products"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerProducts"
+        app:layout_constraintEnd_toEndOf="@id/recyclerProducts"
+        app:layout_constraintStart_toStartOf="@id/recyclerProducts"
+        app:layout_constraintTop_toTopOf="@id/recyclerProducts" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

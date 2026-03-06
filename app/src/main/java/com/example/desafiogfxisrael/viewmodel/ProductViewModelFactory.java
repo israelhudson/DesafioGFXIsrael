@@ -4,12 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.desafiogfxisrael.repository.ProductRepository;
+import com.example.desafiogfxisrael.repository.ProductRepositoryContract;
+
+import javax.inject.Inject;
 
 public class ProductViewModelFactory implements ViewModelProvider.Factory {
-    private final ProductRepository repository;
+    private final ProductRepositoryContract repository;
 
-    public ProductViewModelFactory(ProductRepository repository) {
+    @Inject
+    public ProductViewModelFactory(ProductRepositoryContract repository) {
         this.repository = repository;
     }
 

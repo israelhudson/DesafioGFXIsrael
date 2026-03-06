@@ -9,6 +9,12 @@
     <string name="category_electronics">Electronics</string>
     <string name="loading_products">Carregando produtos...</string>
     <string name="error_loading_products">Erro ao carregar produtos</string>
+    <string name="error_no_internet">Sem internet. Verifique Wi-Fi ou dados móveis.</string>
+    <string name="error_server_unavailable">Servidor indisponível no momento (erro 5xx).</string>
+    <string name="error_api_failure">Falha ao processar resposta da API.</string>
+    <string name="error_empty_products">Nenhum produto retornado pela API.</string>
+    <string name="error_unknown">Erro inesperado ao carregar produtos.</string>
+    <string name="empty_filtered_products">Nenhum produto para o filtro selecionado.</string>
     <string name="product_image_content_description">Imagem do produto</string>
     <string name="error_loading_image">Erro ao carregar imagem</string>
 

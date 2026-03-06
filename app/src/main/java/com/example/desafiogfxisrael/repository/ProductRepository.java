@@ -7,33 +7,41 @@ import com.example.desafiogfxisrael.domain.Product;
 import com.example.desafiogfxisrael.model.ProductModel;
 import com.example.desafiogfxisrael.network.ApiService;
 
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProductRepository {
-    public interface RepositoryCallback {
-        void onSuccess(List<Product> products);
-
-        void onError(String message);
-    }
-
+@Singleton
+public class ProductRepository implements ProductRepositoryContract {
     private final ApiService apiService;
 
+    @Inject
     public ProductRepository(ApiService apiService) {
         this.apiService = apiService;
     }
 
+    @Override
     public void fetchProducts(final RepositoryCallback callback) {
         apiService.getProducts().enqueue(new Callback<List<ProductModel>>() {
             @Override
             public void onResponse(@NonNull Call<List<ProductModel>> call, @NonNull Response<List<ProductModel>> response) {
-                if (!response.isSuccessful() || response.body() == null) {
-                    callback.onError("Erro ao carregar produtos");
+                if (!response.isSuccessful()) {
+                    callback.onError(response.code() >= 500 ? RepositoryError.SERVER_ERROR : RepositoryError.API_ERROR);
+                    return;
+                }
+                if (response.body() == null || response.body().isEmpty()) {
+                    callback.onError(RepositoryError.EMPTY_RESPONSE);
                     return;
                 }
 
@@ -46,11 +54,12 @@ public class ProductRepository {
 
             @Override
             public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable throwable) {
-                callback.onError(throwable.getMessage() == null ? "Erro de rede" : throwable.getMessage());
+                callback.onError(mapThrowableToError(throwable));
             }
         });
     }
 
+    @Override
     public List<Product> filterByCategory(List<Product> products, Category category) {
         if (products == null || products.isEmpty()) {
             return Collections.emptyList();
@@ -66,5 +75,15 @@ public class ProductRepository {
             }
         }
         return filteredProducts;
+    }
+
+    private RepositoryError mapThrowableToError(Throwable throwable) {
+        if (throwable instanceof UnknownHostException
+                || throwable instanceof ConnectException
+                || throwable instanceof SocketTimeoutException
+                || throwable instanceof IOException) {
+            return RepositoryError.NO_INTERNET;
+        }
+        return RepositoryError.UNKNOWN;
     }
 }
