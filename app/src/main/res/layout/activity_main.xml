@@ -5,33 +5,34 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".ui.MainActivity">
 
-    <TextView
-        android:id="@+id/textScreenTitle"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/screen_title_products"
-        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+        android:layout_height="48dp"
+        android:background="?attr/colorSurfaceContainer"
+        android:elevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/screen_title_products"
+        app:titleCentered="false"
+        app:titleTextColor="?attr/colorOnSurface" />
 
     <TextView
         android:id="@+id/textFilterLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:text="@string/filter_label"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textScreenTitle" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <Spinner
         android:id="@+id/spinnerCategory"
@@ -40,6 +41,14 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_category_selector"
+        android:clickable="true"
+        android:focusable="true"
+        android:minHeight="48dp"
+        android:spinnerMode="dropdown"
+        android:paddingStart="12dp"
+        android:paddingEnd="40dp"
+        android:popupBackground="?attr/colorSurfaceContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textFilterLabel" />
@@ -68,5 +77,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/spinnerCategory" />
+
+    <TextView
+        android:id="@+id/textEmptyState"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/empty_filtered_products"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerProducts"
+        app:layout_constraintEnd_toEndOf="@id/recyclerProducts"
+        app:layout_constraintStart_toStartOf="@id/recyclerProducts"
+        app:layout_constraintTop_toTopOf="@id/recyclerProducts" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

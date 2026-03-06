@@ -6,6 +6,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -14,40 +15,68 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.desafiogfxisrael.DesafioApplication;
 import com.example.desafiogfxisrael.R;
 import com.example.desafiogfxisrael.domain.Category;
-import com.example.desafiogfxisrael.network.ApiService;
-import com.example.desafiogfxisrael.network.RetrofitClient;
-import com.example.desafiogfxisrael.repository.ProductRepository;
+import com.example.desafiogfxisrael.domain.Product;
+import com.example.desafiogfxisrael.repository.RepositoryError;
 import com.example.desafiogfxisrael.viewmodel.ProductViewModel;
 import com.example.desafiogfxisrael.viewmodel.ProductViewModelFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity {
     private ProductViewModel viewModel;
     private ProductAdapter productAdapter;
     private ProgressBar progressBar;
+    private Spinner categorySpinner;
+    private TextView emptyStateTextView;
+    private final List<Product> currentProducts = new ArrayList<>();
+    private boolean isLoading = false;
+    private boolean hasRequestedProducts = false;
+    @Inject
+    ProductViewModelFactory productViewModelFactory;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setupUi();
-        setupViewModel();
-        observeViewModel();
+        injectDependencies();
+        initViews();
+        viewModel = createViewModel();
+        setupRecyclerView();
+        setupCategoryFilter();
+        observeViewModelState();
 
-        viewModel.loadProducts();
+        loadProductsWithNetworkGuard();
     }
 
-    private void setupUi() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerProducts);
-        Spinner categorySpinner = findViewById(R.id.spinnerCategory);
+    private void initViews() {
         progressBar = findViewById(R.id.progressBar);
+        categorySpinner = findViewById(R.id.spinnerCategory);
+        emptyStateTextView = findViewById(R.id.textEmptyState);
+    }
 
+    private ProductViewModel createViewModel() {
+        return new ViewModelProvider(this, productViewModelFactory).get(ProductViewModel.class);
+    }
+
+    private void injectDependencies() {
+        ((DesafioApplication) getApplication()).getAppComponent().inject(this);
+    }
+
+    private void setupRecyclerView() {
+        RecyclerView recyclerView = findViewById(R.id.recyclerProducts);
         productAdapter = new ProductAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(productAdapter);
+    }
 
+    private void setupCategoryFilter() {
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.category_filter_items,
@@ -58,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                viewModel.applyCategoryFilter(mapPositionToCategory(position));
+                viewModel.applyCategoryFilter(Category.fromFilterPosition(position));
             }
 
             @Override
@@ -68,36 +97,55 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupViewModel() {
-        ApiService apiService = RetrofitClient.getInstance().create(ApiService.class);
-        ProductRepository repository = new ProductRepository(apiService);
-        ProductViewModelFactory factory = new ProductViewModelFactory(repository);
-        viewModel = new ViewModelProvider(this, factory).get(ProductViewModel.class);
+    private void observeViewModelState() {
+        observeProducts();
+        observeLoading();
+        observeError();
     }
 
-    private void observeViewModel() {
-        viewModel.getProducts().observe(this, products -> productAdapter.updateData(products));
-        viewModel.getLoading().observe(this, loading ->
-                progressBar.setVisibility(Boolean.TRUE.equals(loading) ? View.VISIBLE : View.GONE));
+    private void observeProducts() {
+        viewModel.getProducts().observe(this, products -> {
+            productAdapter.updateData(products);
+            currentProducts.clear();
+            if (products != null) {
+                currentProducts.addAll(products);
+            }
+            renderEmptyState();
+        });
+    }
+
+    private void observeLoading() {
+        viewModel.getLoading().observe(this, loading -> {
+            isLoading = Boolean.TRUE.equals(loading);
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            renderEmptyState();
+        });
+    }
+
+    private void observeError() {
         viewModel.getError().observe(this, error -> {
-            if (error != null && !error.isEmpty()) {
-                Toast.makeText(this, getString(R.string.error_loading_products), Toast.LENGTH_SHORT).show();
+            if (error != null) {
+                showError(error);
             }
         });
     }
 
-    private Category mapPositionToCategory(int position) {
-        switch (position) {
-            case 1:
-                return Category.MENS_CLOTHING;
-            case 2:
-                return Category.WOMENS_CLOTHING;
-            case 3:
-                return Category.JEWELERY;
-            case 4:
-                return Category.ELECTRONICS;
-            default:
-                return null;
+    private void loadProductsWithNetworkGuard() {
+        if (!NetworkStatusChecker.isConnected(this)) {
+            showError(RepositoryError.NO_INTERNET);
+            return;
         }
+        hasRequestedProducts = true;
+        viewModel.loadProducts();
     }
+
+    private void renderEmptyState() {
+        boolean showEmptyState = hasRequestedProducts && !isLoading && currentProducts.isEmpty();
+        emptyStateTextView.setVisibility(showEmptyState ? View.VISIBLE : View.GONE);
+    }
+
+    private void showError(RepositoryError error) {
+        Toast.makeText(this, getString(ErrorMessageMapper.toMessageRes(error)), Toast.LENGTH_SHORT).show();
+    }
+
 }
