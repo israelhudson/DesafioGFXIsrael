@@ -26,28 +26,42 @@ public class MainActivity extends AppCompatActivity {
     private ProductViewModel viewModel;
     private ProductAdapter productAdapter;
     private ProgressBar progressBar;
+    private Spinner categorySpinner;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setupUi();
-        setupViewModel();
-        observeViewModel();
+        initViews();
+        viewModel = createViewModel();
+        setupRecyclerView();
+        setupCategoryFilter();
+        observeViewModelState();
 
         viewModel.loadProducts();
     }
 
-    private void setupUi() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerProducts);
-        Spinner categorySpinner = findViewById(R.id.spinnerCategory);
+    private void initViews() {
         progressBar = findViewById(R.id.progressBar);
+        categorySpinner = findViewById(R.id.spinnerCategory);
+    }
 
+    private ProductViewModel createViewModel() {
+        ApiService apiService = RetrofitClient.getInstance().create(ApiService.class);
+        ProductRepository repository = new ProductRepository(apiService);
+        ProductViewModelFactory factory = new ProductViewModelFactory(repository);
+        return new ViewModelProvider(this, factory).get(ProductViewModel.class);
+    }
+
+    private void setupRecyclerView() {
+        RecyclerView recyclerView = findViewById(R.id.recyclerProducts);
         productAdapter = new ProductAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(productAdapter);
+    }
 
+    private void setupCategoryFilter() {
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.category_filter_items,
@@ -58,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                viewModel.applyCategoryFilter(mapPositionToCategory(position));
+                viewModel.applyCategoryFilter(Category.fromFilterPosition(position));
             }
 
             @Override
@@ -68,17 +82,22 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupViewModel() {
-        ApiService apiService = RetrofitClient.getInstance().create(ApiService.class);
-        ProductRepository repository = new ProductRepository(apiService);
-        ProductViewModelFactory factory = new ProductViewModelFactory(repository);
-        viewModel = new ViewModelProvider(this, factory).get(ProductViewModel.class);
+    private void observeViewModelState() {
+        observeProducts();
+        observeLoading();
+        observeError();
     }
 
-    private void observeViewModel() {
+    private void observeProducts() {
         viewModel.getProducts().observe(this, products -> productAdapter.updateData(products));
+    }
+
+    private void observeLoading() {
         viewModel.getLoading().observe(this, loading ->
                 progressBar.setVisibility(Boolean.TRUE.equals(loading) ? View.VISIBLE : View.GONE));
+    }
+
+    private void observeError() {
         viewModel.getError().observe(this, error -> {
             if (error != null && !error.isEmpty()) {
                 Toast.makeText(this, getString(R.string.error_loading_products), Toast.LENGTH_SHORT).show();
@@ -86,18 +105,4 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private Category mapPositionToCategory(int position) {
-        switch (position) {
-            case 1:
-                return Category.MENS_CLOTHING;
-            case 2:
-                return Category.WOMENS_CLOTHING;
-            case 3:
-                return Category.JEWELERY;
-            case 4:
-                return Category.ELECTRONICS;
-            default:
-                return null;
-        }
-    }
 }

@@ -33,4 +33,19 @@ public enum Category {
         }
         return null;
     }
+
+    public static Category fromFilterPosition(int position) {
+        switch (position) {
+            case 1:
+                return MENS_CLOTHING;
+            case 2:
+                return WOMENS_CLOTHING;
+            case 3:
+                return JEWELERY;
+            case 4:
+                return ELECTRONICS;
+            default:
+                return null;
+        }
+    }
 }
