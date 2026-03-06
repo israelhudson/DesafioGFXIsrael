@@ -17,6 +17,7 @@
     <string name="empty_filtered_products">Nenhum produto para o filtro selecionado.</string>
     <string name="product_image_content_description">Imagem do produto</string>
     <string name="error_loading_image">Erro ao carregar imagem</string>
+    <string name="All">Todos</string>
 
     <string-array name="category_filter_items">
         <item>@string/filter_all</item>

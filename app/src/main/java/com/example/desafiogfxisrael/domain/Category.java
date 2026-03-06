@@ -6,28 +6,28 @@ public enum Category {
     JEWELERY("jewelery", "Jewelery"),
     ELECTRONICS("electronics", "Electronics");
 
-    private final String apiValue;
+    private final String keyValue;
     private final String displayName;
 
-    Category(String apiValue, String displayName) {
-        this.apiValue = apiValue;
+    Category(String keyValue, String displayName) {
+        this.keyValue = keyValue;
         this.displayName = displayName;
     }
 
-    public String getApiValue() {
-        return apiValue;
+    public String getKeyValue() {
+        return keyValue;
     }
 
     public String getDisplayName() {
         return displayName;
     }
 
-    public static Category fromApiValue(String apiValue) {
-        if (apiValue == null) {
+    public static Category fromKeyValue(String keyValue) {
+        if (keyValue == null) {
             return null;
         }
         for (Category category : values()) {
-            if (category.apiValue.equalsIgnoreCase(apiValue.trim())) {
+            if (category.keyValue.equalsIgnoreCase(keyValue.trim())) {
                 return category;
             }
         }

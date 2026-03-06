@@ -17,7 +17,7 @@ public class ProductModel {
                 title,
                 price,
                 description,
-                Category.fromApiValue(category),
+                Category.fromKeyValue(category),
                 image
         );
     }
